@@ -7,7 +7,7 @@
 // Change this to your deployed backend URL
 const API_BASE = window.location.hostname === 'localhost'
   ? 'http://localhost:8080/api'
-  : 'https://gymcal-backend.onrender.com/api';
+  : 'https://gymcal-backend-1.onrender.com/api';
 
 // ── STATE ──
 let token = localStorage.getItem('gymcal_token') || null;
