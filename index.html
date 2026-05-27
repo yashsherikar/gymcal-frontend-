@@ -3,30 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GymCal — Smart Nutrition Tracker</title>
+  <title>GymCal — AI Nutrition Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════
+<!-- Animated Background Canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ════════════════════════════════
      AUTH SCREEN
-══════════════════════════════════════════════ -->
+════════════════════════════════ -->
 <div id="auth-screen" class="screen active">
-  <div class="auth-bg">
+  <div class="auth-particles">
     <div class="auth-grid"></div>
     <div class="auth-orb orb1"></div>
     <div class="auth-orb orb2"></div>
+    <div class="auth-orb orb3"></div>
   </div>
+
   <div class="auth-container">
     <div class="brand">
-      <div class="brand-icon">⚡</div>
+      <div class="brand-icon-wrap">⚡</div>
       <h1 class="brand-name">GymCal</h1>
       <p class="brand-tagline">AI-Powered Nutrition Intelligence</p>
     </div>
 
-    <!-- Login Form -->
+    <!-- Login -->
     <div id="login-form" class="auth-card">
       <h2>Welcome Back</h2>
       <p class="auth-sub">Track your macros, crush your goals</p>
@@ -34,24 +39,24 @@
         <label>Email</label>
         <input type="email" id="login-email" placeholder="you@example.com" />
       </div>
-      <div class="form-group">
+      <div class="form-group" style="margin-top:0.8rem">
         <label>Password</label>
         <input type="password" id="login-password" placeholder="••••••••" />
       </div>
       <div id="login-error" class="form-error hidden"></div>
       <button class="btn-primary" onclick="handleLogin()">
-        <span class="btn-text">Sign In</span>
+        <span class="btn-text">Sign In →</span>
         <span class="btn-loader hidden">⟳</span>
       </button>
       <p class="auth-switch">No account? <a onclick="toggleAuth('register')">Create one →</a></p>
     </div>
 
-    <!-- Register Form -->
+    <!-- Register -->
     <div id="register-form" class="auth-card hidden">
       <h2>Create Account</h2>
-      <p class="auth-sub">Let's set up your fitness profile</p>
+      <p class="auth-sub">Set up your AI fitness profile</p>
 
-      <div class="form-row">
+      <div class="form-row" style="margin-bottom:0.8rem">
         <div class="form-group">
           <label>Full Name</label>
           <input type="text" id="reg-name" placeholder="Rahul Sharma" />
@@ -61,13 +66,13 @@
           <input type="email" id="reg-email" placeholder="you@example.com" />
         </div>
       </div>
-      <div class="form-group">
+      <div class="form-group" style="margin-bottom:0.8rem">
         <label>Password</label>
         <input type="password" id="reg-password" placeholder="min. 6 characters" />
       </div>
 
       <div class="section-label">Body Metrics</div>
-      <div class="form-row">
+      <div class="form-row three" style="margin-bottom:0.8rem">
         <div class="form-group">
           <label>Weight (kg)</label>
           <input type="number" id="reg-weight" placeholder="70" />
@@ -82,7 +87,7 @@
         </div>
       </div>
 
-      <div class="form-row">
+      <div class="form-row" style="margin-bottom:0.8rem">
         <div class="form-group">
           <label>Gender</label>
           <select id="reg-gender">
@@ -94,7 +99,7 @@
           <label>Activity Level</label>
           <select id="reg-activity">
             <option value="SEDENTARY">Sedentary</option>
-            <option value="LIGHT">Light</option>
+            <option value="LIGHT">Light Activity</option>
             <option value="MODERATE">Moderate</option>
             <option value="ACTIVE">Active</option>
             <option value="VERY_ACTIVE">Very Active</option>
@@ -105,26 +110,22 @@
       <div class="section-label">Your Goal</div>
       <div class="goal-grid">
         <div class="goal-card active" data-goal="WEIGHT_LOSS" onclick="selectGoal(this)">
-          <span class="goal-emoji">🔥</span>
-          <span class="goal-label">Weight Loss</span>
+          <span class="goal-emoji">🔥</span><span class="goal-label">Weight Loss</span>
         </div>
         <div class="goal-card" data-goal="MUSCLE_GAIN" onclick="selectGoal(this)">
-          <span class="goal-emoji">💪</span>
-          <span class="goal-label">Muscle Gain</span>
+          <span class="goal-emoji">💪</span><span class="goal-label">Muscle Gain</span>
         </div>
         <div class="goal-card" data-goal="MAINTAIN" onclick="selectGoal(this)">
-          <span class="goal-emoji">⚖️</span>
-          <span class="goal-label">Maintain</span>
+          <span class="goal-emoji">⚖️</span><span class="goal-label">Maintain</span>
         </div>
         <div class="goal-card" data-goal="RECOMPOSITION" onclick="selectGoal(this)">
-          <span class="goal-emoji">🔄</span>
-          <span class="goal-label">Recomposition</span>
+          <span class="goal-emoji">🔄</span><span class="goal-label">Recomp</span>
         </div>
       </div>
 
       <div id="reg-error" class="form-error hidden"></div>
       <button class="btn-primary" onclick="handleRegister()">
-        <span class="btn-text">Create Account</span>
+        <span class="btn-text">Create Account →</span>
         <span class="btn-loader hidden">⟳</span>
       </button>
       <p class="auth-switch">Have an account? <a onclick="toggleAuth('login')">Sign in →</a></p>
@@ -132,15 +133,15 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
+<!-- ════════════════════════════════
      MAIN APP
-══════════════════════════════════════════════ -->
+════════════════════════════════ -->
 <div id="app-screen" class="screen hidden">
 
   <!-- Sidebar -->
   <nav class="sidebar">
     <div class="sidebar-brand">
-      <span class="brand-icon-sm">⚡</span>
+      <div class="brand-icon-sm">⚡</div>
       <span>GymCal</span>
     </div>
     <div class="nav-links">
@@ -163,9 +164,9 @@
     </div>
   </nav>
 
-  <!-- Mobile Top Bar -->
+  <!-- Mobile Header -->
   <header class="mobile-header">
-    <span class="brand-icon-sm">⚡</span>
+    <div class="brand-icon-sm">⚡</div>
     <span class="mobile-brand">GymCal</span>
     <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
   </header>
@@ -177,10 +178,9 @@
     <a onclick="handleLogout()">🚪 Sign Out</a>
   </div>
 
-  <!-- Page Content -->
   <main class="main-content">
 
-    <!-- ── DASHBOARD PAGE ── -->
+    <!-- ── DASHBOARD ── -->
     <div id="page-dashboard" class="page active">
       <div class="page-header">
         <div>
@@ -190,7 +190,6 @@
         <button class="btn-add-food" onclick="showPage('food')">+ Add Food</button>
       </div>
 
-      <!-- Calorie Ring + Quick Stats -->
       <div class="dashboard-hero">
         <div class="calorie-ring-wrap">
           <svg class="calorie-ring" viewBox="0 0 200 200">
@@ -202,61 +201,60 @@
             <div class="ring-label">kcal eaten</div>
             <div class="ring-remaining" id="ring-remaining">— left</div>
           </div>
+          <div class="ring-target-label" id="ring-target-label">of — kcal target</div>
         </div>
         <div class="macro-cards">
           <div class="macro-card protein">
-            <div class="macro-icon">🥩</div>
+            <div class="macro-emoji">🥩</div>
             <div class="macro-info">
               <div class="macro-val" id="dash-protein">0g</div>
               <div class="macro-name">Protein</div>
-              <div class="macro-bar-wrap"><div class="macro-bar" id="dash-protein-bar"></div></div>
+              <div class="macro-bar-wrap"><div class="macro-bar" id="dash-protein-bar" style="width:0%"></div></div>
               <div class="macro-target" id="dash-protein-target">of — g</div>
             </div>
           </div>
           <div class="macro-card carbs">
-            <div class="macro-icon">🌾</div>
+            <div class="macro-emoji">🌾</div>
             <div class="macro-info">
               <div class="macro-val" id="dash-carbs">0g</div>
               <div class="macro-name">Carbs</div>
-              <div class="macro-bar-wrap"><div class="macro-bar" id="dash-carbs-bar"></div></div>
+              <div class="macro-bar-wrap"><div class="macro-bar" id="dash-carbs-bar" style="width:0%"></div></div>
               <div class="macro-target" id="dash-carbs-target">of — g</div>
             </div>
           </div>
           <div class="macro-card fat">
-            <div class="macro-icon">🥑</div>
+            <div class="macro-emoji">🥑</div>
             <div class="macro-info">
               <div class="macro-val" id="dash-fat">0g</div>
               <div class="macro-name">Fat</div>
-              <div class="macro-bar-wrap"><div class="macro-bar" id="dash-fat-bar"></div></div>
+              <div class="macro-bar-wrap"><div class="macro-bar" id="dash-fat-bar" style="width:0%"></div></div>
               <div class="macro-target" id="dash-fat-target">of — g</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Today's Meals -->
       <div class="section-title">Today's Meals</div>
       <div id="today-meals-list" class="meals-list">
-        <div class="empty-state">No food logged yet today. <a onclick="showPage('food')">Add your first meal →</a></div>
+        <div class="empty-state">No food logged yet. <a onclick="showPage('food')">Add your first meal →</a></div>
       </div>
     </div>
 
-    <!-- ── FOOD LOG PAGE ── -->
+    <!-- ── FOOD LOG ── -->
     <div id="page-food" class="page hidden">
       <div class="page-header">
         <div>
           <h2>Food Log</h2>
-          <p class="page-sub">Search food, see nutrition, add to your day</p>
+          <p class="page-sub">AI-powered nutrition analysis</p>
         </div>
       </div>
 
-      <!-- Search Food -->
       <div class="food-search-card">
         <div class="search-title">🔍 AI Food Search</div>
         <div class="search-row">
           <div class="form-group flex1">
             <label>Food Name</label>
-            <input type="text" id="food-name-input" placeholder="e.g. chicken breast, dal chawal, banana" />
+            <input type="text" id="food-name-input" placeholder="e.g. chicken breast, dal chawal, banana..." />
           </div>
           <div class="form-group w120">
             <label>Quantity (g)</label>
@@ -264,6 +262,12 @@
           </div>
           <button class="btn-search" onclick="searchFood()">Analyze</button>
         </div>
+
+        <div id="food-search-loading" class="search-loading hidden">
+          <div class="loader-dots"><span></span><span></span><span></span></div>
+          <p>AI is analyzing nutrition…</p>
+        </div>
+
         <div id="food-search-result" class="food-result hidden">
           <div class="result-header">
             <div class="result-name" id="result-name"></div>
@@ -284,44 +288,52 @@
               <option value="DINNER">🌙 Dinner</option>
               <option value="SNACK">🍿 Snack</option>
             </select>
-            <button class="btn-primary" onclick="addToLog()">+ Add to Today's Log</button>
+            <button class="btn-primary" onclick="addToLog()">
+              <span class="btn-text">+ Add to Log</span>
+              <span class="btn-loader hidden">⟳</span>
+            </button>
           </div>
-        </div>
-        <div id="food-search-loading" class="search-loading hidden">
-          <div class="loader-dots"><span></span><span></span><span></span></div>
-          <p>AI is analyzing nutrition data…</p>
         </div>
         <div id="food-search-error" class="form-error hidden"></div>
       </div>
 
-      <!-- Daily Log -->
       <div class="section-title" style="margin-top:2rem">Today's Log</div>
       <div id="food-log-list" class="meals-list">
         <div class="empty-state">No food logged today.</div>
       </div>
     </div>
 
-    <!-- ── WEEKLY PAGE ── -->
+    <!-- ── WEEKLY ── -->
     <div id="page-weekly" class="page hidden">
       <div class="page-header">
         <h2>Weekly Overview</h2>
         <p class="page-sub">Last 7 days nutrition summary</p>
       </div>
-      <div id="weekly-chart-wrap" class="weekly-wrap">
+
+      <div class="weekly-stats-row" id="weekly-stats-row">
+        <div class="weekly-stat-card"><div class="weekly-stat-val" id="ws-avg-cal">—</div><div class="weekly-stat-lbl">Avg Calories</div></div>
+        <div class="weekly-stat-card"><div class="weekly-stat-val" id="ws-avg-pro">—</div><div class="weekly-stat-lbl">Avg Protein</div></div>
+        <div class="weekly-stat-card"><div class="weekly-stat-val" id="ws-days-logged">—</div><div class="weekly-stat-lbl">Days Logged</div></div>
+        <div class="weekly-stat-card"><div class="weekly-stat-val" id="ws-goal-hit">—</div><div class="weekly-stat-lbl">Goal Hit %</div></div>
+      </div>
+
+      <div class="weekly-wrap">
+        <div class="weekly-chart-title">Calories — Last 7 Days</div>
         <canvas id="weekly-chart"></canvas>
       </div>
+
+      <div class="section-title">Daily Breakdown</div>
       <div id="weekly-list" class="weekly-list"></div>
     </div>
 
-    <!-- ── PROFILE PAGE ── -->
+    <!-- ── PROFILE ── -->
     <div id="page-profile" class="page hidden">
       <div class="page-header">
         <h2>Profile & Goals</h2>
-        <p class="page-sub">Your body metrics and nutrition targets</p>
+        <p class="page-sub">Body metrics and nutrition targets</p>
       </div>
 
       <div class="profile-grid">
-        <!-- BMI Card -->
         <div class="profile-card bmi-card">
           <div class="profile-card-title">BMI Status</div>
           <div class="bmi-display">
@@ -330,44 +342,45 @@
           </div>
           <div class="bmi-bar-wrap">
             <div class="bmi-scale">
-              <div class="bmi-seg underweight">Under</div>
-              <div class="bmi-seg normal">Normal</div>
-              <div class="bmi-seg overweight">Over</div>
-              <div class="bmi-seg obese">Obese</div>
+              <div class="bmi-seg underweight"></div>
+              <div class="bmi-seg normal"></div>
+              <div class="bmi-seg overweight"></div>
+              <div class="bmi-seg obese"></div>
+            </div>
+            <div class="bmi-labels">
+              <span>Under</span><span>Normal</span><span>Over</span><span>Obese</span>
             </div>
             <div class="bmi-indicator" id="bmi-indicator"></div>
           </div>
         </div>
 
-        <!-- Targets Card -->
         <div class="profile-card targets-card">
           <div class="profile-card-title">Daily Targets</div>
           <div class="targets-list">
-            <div class="target-item"><span>Calories</span><strong id="pt-cal">—</strong></div>
-            <div class="target-item"><span>Protein</span><strong id="pt-pro">—</strong></div>
-            <div class="target-item"><span>Carbs</span><strong id="pt-car">—</strong></div>
-            <div class="target-item"><span>Fat</span><strong id="pt-fat">—</strong></div>
+            <div class="target-item"><span>🔥 Calories</span><strong id="pt-cal">—</strong></div>
+            <div class="target-item"><span>🥩 Protein</span><strong id="pt-pro">—</strong></div>
+            <div class="target-item"><span>🌾 Carbs</span><strong id="pt-car">—</strong></div>
+            <div class="target-item"><span>🥑 Fat</span><strong id="pt-fat">—</strong></div>
           </div>
         </div>
 
-        <!-- Stats Card -->
         <div class="profile-card stats-card">
           <div class="profile-card-title">Your Stats</div>
           <div class="targets-list">
             <div class="target-item"><span>Name</span><strong id="ps-name">—</strong></div>
             <div class="target-item"><span>Weight</span><strong id="ps-weight">—</strong></div>
             <div class="target-item"><span>Height</span><strong id="ps-height">—</strong></div>
+            <div class="target-item"><span>Goal</span><strong id="ps-goal">—</strong></div>
             <div class="target-item"><span>Activity</span><strong id="ps-activity">—</strong></div>
           </div>
         </div>
       </div>
 
-      <!-- Update Goal -->
       <div class="update-goal-card">
-        <div class="profile-card-title">Update Goal</div>
-        <div class="form-row">
+        <div class="profile-card-title">Update Goal & Stats</div>
+        <div class="form-row three">
           <div class="form-group">
-            <label>New Goal</label>
+            <label>Goal</label>
             <select id="update-goal-sel">
               <option value="WEIGHT_LOSS">🔥 Weight Loss</option>
               <option value="MUSCLE_GAIN">💪 Muscle Gain</option>
@@ -386,19 +399,21 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Weight (kg)</label>
+            <label>New Weight (kg)</label>
             <input type="number" id="update-weight-inp" placeholder="70" />
           </div>
         </div>
         <div id="update-goal-msg" class="form-success hidden"></div>
-        <button class="btn-primary" onclick="updateGoal()">Update Targets</button>
+        <button class="btn-primary" onclick="updateGoal()" style="max-width:240px">
+          <span class="btn-text">Update Targets</span>
+          <span class="btn-loader hidden">⟳</span>
+        </button>
       </div>
     </div>
 
   </main>
 </div>
 
-<!-- Toast -->
 <div id="toast" class="toast hidden"></div>
 
 <script src="app.js"></script>
