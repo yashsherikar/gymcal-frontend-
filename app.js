@@ -107,8 +107,13 @@ async function api(method, path, body = null) {
   if (token) opts.headers['Authorization'] = `Bearer ${token}`;
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(`${API_BASE}${path}`, opts);
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
+  // Safe JSON parse — won't crash on empty body or HTML error pages
+  let data = {};
+  const text = await res.text();
+  if (text && text.trim().length > 0) {
+    try { data = JSON.parse(text); } catch(_) { data = { error: text.substring(0, 200) }; }
+  }
+  if (!res.ok) throw new Error(data.error || data.message || `Server error (HTTP ${res.status})`);
   return data;
 }
 
@@ -304,6 +309,11 @@ async function searchFood() {
   loadEl.classList.remove('hidden');
   try {
     const data = await api('POST', '/food/search', { foodName: name, quantityGrams: qty });
+    // Check AI success flag
+    if (!data.success) {
+      showError(errEl, data.errorMessage || 'AI could not analyze this food. Try again.');
+      return;
+    }
     currentFood = data;
     renderFoodResult(data);
   } catch (e) {
@@ -332,14 +342,15 @@ async function addToLog() {
   try {
     await api('POST', '/food/log', {
       foodName: currentFood.foodName,
-      quantityGrams: currentFood.quantityGrams,
-      mealType, logDate: today,
-      calories: currentFood.calories,
-      proteinGrams: currentFood.proteinGrams,
-      carbsGrams: currentFood.carbsGrams,
-      fatGrams: currentFood.fatGrams,
-      fiberGrams: currentFood.fiberGrams || 0,
-      aiAnalysis: currentFood.aiAnalysis
+      quantityGrams: Number(currentFood.quantityGrams) || 100,
+      mealType,
+      logDate: today,
+      calories: Number(currentFood.calories) || 0,
+      proteinGrams: Number(currentFood.proteinGrams) || 0,
+      carbsGrams: Number(currentFood.carbsGrams) || 0,
+      fatGrams: Number(currentFood.fatGrams) || 0,
+      fiberGrams: Number(currentFood.fiberGrams) || 0,
+      aiAnalysis: currentFood.aiAnalysis || ''
     });
     showToast(`✓ ${currentFood.foodName} added to ${mealType.toLowerCase()}!`);
     currentFood = null;
