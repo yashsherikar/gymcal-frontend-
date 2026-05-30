@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════
-   GYMCAL FRONTEND — app.js
-   Premium AI Nutrition Tracker
+   GYMCAL FRONTEND — app.js (UPDATED)
+   New: Workout Plan, Good/Bad Calories,
+        Flexible Food Quantity (grams + count)
 ═══════════════════════════════════════════ */
 
 // ── CONFIG ──
@@ -13,6 +14,8 @@ let token = localStorage.getItem('gymcal_token') || null;
 let userData = null;
 let currentFood = null;
 let dailySummary = null;
+let workoutPlan = null;
+let currentQtyMode = 'grams'; // 'grams' or 'count'
 
 // ── ANIMATED BACKGROUND ──
 (function initBgCanvas() {
@@ -79,10 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
   updateGreeting();
   if (token) showApp();
 
-  // Enter key on food search
   setTimeout(() => {
     const inp = document.getElementById('food-name-input');
     if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') searchFood(); });
+    const inp2 = document.getElementById('food-name-count');
+    if (inp2) inp2.addEventListener('keydown', e => { if (e.key === 'Enter') searchFoodCount(); });
     const loginPwd = document.getElementById('login-password');
     if (loginPwd) loginPwd.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
   }, 300);
@@ -107,7 +111,6 @@ async function api(method, path, body = null) {
   if (token) opts.headers['Authorization'] = `Bearer ${token}`;
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(`${API_BASE}${path}`, opts);
-  // Safe JSON parse — won't crash on empty body or HTML error pages
   let data = {};
   const text = await res.text();
   if (text && text.trim().length > 0) {
@@ -177,7 +180,7 @@ async function handleRegister() {
 }
 
 function handleLogout() {
-  token = null; userData = null;
+  token = null; userData = null; workoutPlan = null;
   localStorage.removeItem('gymcal_token');
   document.getElementById('app-screen').className = 'screen hidden';
   document.getElementById('auth-screen').className = 'screen active';
@@ -209,6 +212,7 @@ function showPage(page) {
   document.querySelectorAll(`[data-page="${page}"]`).forEach(l => l.classList.add('active'));
   if (page === 'dashboard') loadDashboard();
   if (page === 'food') loadFoodPage();
+  if (page === 'workout') loadWorkoutPlan();
   if (page === 'weekly') loadWeekly();
   if (page === 'profile') populateProfilePage();
 }
@@ -253,7 +257,45 @@ function renderDashboard(s) {
   setEl('dash-carbs-target', `of ${Math.round(tCar)}g`);
   setEl('dash-fat-target', `of ${Math.round(tFat)}g`);
 
+  // ── Good vs Bad Calories Dashboard ──
+  renderDashCalorieQuality(s);
+
   renderMealsList('today-meals-list', s.meals || []);
+}
+
+function renderDashCalorieQuality(s) {
+  const total = s.consumedCalories || 0;
+  const good = s.goodCalories || 0;
+  const bad = s.badCalories || 0;
+  const neutral = s.neutralCalories || 0;
+  const goodPct = s.goodCaloriePercent || 0;
+  const badPct = s.badCaloriePercent || 0;
+  const neutralPct = total > 0 ? Math.round(100 - goodPct - badPct) : 0;
+
+  // Animate bars (delay so DOM is ready)
+  setTimeout(() => {
+    setStyle('dash-good-bar', 'width', `${Math.min(goodPct, 100)}%`);
+    setStyle('dash-neutral-bar', 'width', `${Math.min(neutralPct, 100)}%`);
+    setStyle('dash-bad-bar', 'width', `${Math.min(badPct, 100)}%`);
+  }, 200);
+
+  setEl('dash-good-cal', `${Math.round(good)} kcal`);
+  setEl('dash-neutral-cal', `${Math.round(neutral)} kcal`);
+  setEl('dash-bad-cal', `${Math.round(bad)} kcal`);
+
+  let summary = '';
+  if (total === 0) {
+    summary = 'Log food to see calorie quality breakdown';
+  } else if (badPct <= 15 && goodPct >= 45) {
+    summary = `🌟 Excellent day! ${Math.round(goodPct)}% of your calories are high-quality.`;
+  } else if (badPct <= 30) {
+    summary = `✅ Good balance. Keep focusing on protein-rich, whole foods.`;
+  } else if (badPct <= 50) {
+    summary = `⚠️ ${Math.round(badPct)}% of calories are from saturated fat/sugar. Balance with more protein.`;
+  } else {
+    summary = `🚨 High bad-calorie intake today. Try adding more lean protein and vegetables.`;
+  }
+  setEl('dash-cq-summary', summary);
 }
 
 function renderMealsList(containerId, meals) {
@@ -267,13 +309,21 @@ function renderMealsList(containerId, meals) {
     <div class="meal-group">
       <div class="meal-group-header">
         <span>${mealEmoji(meal.mealType)} ${meal.mealType}</span>
-        <span class="meal-group-kcal">${Math.round(meal.totalCalories || 0)} kcal</span>
+        <div style="display:flex;align-items:center;gap:0.6rem">
+          <span style="font-size:0.72rem;color:var(--success)">✅ ${Math.round(meal.goodCalories||0)}</span>
+          <span style="font-size:0.72rem;color:var(--danger)">⚠️ ${Math.round(meal.badCalories||0)}</span>
+          <span class="meal-group-kcal">${Math.round(meal.totalCalories || 0)} kcal</span>
+        </div>
       </div>
       ${(meal.items || []).map(item => `
         <div class="food-item">
           <div class="food-item-left">
-            <div class="food-item-name">${item.foodName}</div>
-            <div class="food-item-macros">${item.quantityGrams}g · P: ${Math.round(item.proteinGrams || 0)}g · C: ${Math.round(item.carbsGrams || 0)}g · F: ${Math.round(item.fatGrams || 0)}g</div>
+            <div class="food-item-name">
+              ${item.foodName}
+              <span class="food-item-qty">${item.quantityDisplay || item.quantityGrams + 'g'}</span>
+              <span class="quality-dot ${item.calorieQuality || 'MODERATE'}" title="${item.calorieQuality||''}"></span>
+            </div>
+            <div class="food-item-macros">P: ${Math.round(item.proteinGrams||0)}g · C: ${Math.round(item.carbsGrams||0)}g · F: ${Math.round(item.fatGrams||0)}g</div>
           </div>
           <div class="food-item-cal">${Math.round(item.calories || 0)} kcal</div>
           <button class="btn-delete" onclick="deleteLog('${item.id}')" title="Remove">✕</button>
@@ -288,28 +338,48 @@ function mealEmoji(t) {
 }
 
 // ════════════════════════════════
-// FOOD SEARCH & LOG
+// FOOD SEARCH — QUANTITY MODE
 // ════════════════════════════════
-async function loadFoodPage() {
-  try {
-    dailySummary = await api('GET', '/food/daily');
-    renderMealsList('food-log-list', dailySummary.meals || []);
-  } catch (e) { console.error(e); }
+function switchQtyMode(mode) {
+  currentQtyMode = mode;
+  document.getElementById('qty-mode-grams').classList.toggle('hidden', mode !== 'grams');
+  document.getElementById('qty-mode-count').classList.toggle('hidden', mode !== 'count');
+  document.getElementById('tab-grams').classList.toggle('active', mode === 'grams');
+  document.getElementById('tab-count').classList.toggle('active', mode === 'count');
+  // Clear results
+  document.getElementById('food-search-result').classList.add('hidden');
+  document.getElementById('food-search-error').classList.add('hidden');
+  currentFood = null;
 }
 
+// ── Search by grams ──
 async function searchFood() {
   const name = document.getElementById('food-name-input').value.trim();
   const qty = parseFloat(document.getElementById('food-qty-input').value) || 100;
+  await runFoodSearch({ foodName: name, quantityGrams: qty });
+}
+
+// ── Search by count/unit ──
+async function searchFoodCount() {
+  const name = document.getElementById('food-name-count').value.trim();
+  const amount = parseFloat(document.getElementById('food-amount-count').value) || 1;
+  const unit = document.getElementById('food-unit-count').value;
+  await runFoodSearch({ foodName: name, quantityAmount: amount, quantityUnit: unit });
+}
+
+async function runFoodSearch(requestBody) {
+  if (!requestBody.foodName) {
+    const errEl = document.getElementById('food-search-error');
+    showError(errEl, 'Please enter a food name.'); return;
+  }
   const errEl = document.getElementById('food-search-error');
   const loadEl = document.getElementById('food-search-loading');
   const resultEl = document.getElementById('food-search-result');
-  if (!name) { showError(errEl, 'Please enter a food name.'); return; }
   errEl.classList.add('hidden');
   resultEl.classList.add('hidden');
   loadEl.classList.remove('hidden');
   try {
-    const data = await api('POST', '/food/search', { foodName: name, quantityGrams: qty });
-    // Check AI success flag
+    const data = await api('POST', '/food/search', requestBody);
     if (!data.success) {
       showError(errEl, data.errorMessage || 'AI could not analyze this food. Try again.');
       return;
@@ -323,14 +393,45 @@ async function searchFood() {
 
 function renderFoodResult(d) {
   setEl('result-name', d.foodName);
-  setEl('result-qty', `${d.quantityGrams}g`);
+  setEl('result-qty', d.quantityDisplay || `${d.quantityGrams}g`);
   setEl('res-cal', Math.round(d.calories || 0));
   setEl('res-pro', `${Math.round(d.proteinGrams || 0)}g`);
   setEl('res-car', `${Math.round(d.carbsGrams || 0)}g`);
   setEl('res-fat', `${Math.round(d.fatGrams || 0)}g`);
   setEl('res-fib', `${Math.round(d.fiberGrams || 0)}g`);
   setEl('result-ai', d.aiAnalysis || '');
+
+  // ── Good vs Bad calories in result ──
+  renderResultCalorieQuality(d);
+
   document.getElementById('food-search-result').classList.remove('hidden');
+}
+
+function renderResultCalorieQuality(d) {
+  const total = d.calories || 1;
+  const good = d.goodCalories || 0;
+  const bad = d.badCalories || 0;
+  const neutral = d.neutralCalories || 0;
+
+  const goodPct = Math.round((good / total) * 100);
+  const badPct  = Math.round((bad  / total) * 100);
+  const neutralPct = Math.max(0, 100 - goodPct - badPct);
+
+  const badge = document.getElementById('rcq-badge');
+  if (badge) {
+    badge.textContent = d.calorieQuality || 'MODERATE';
+    badge.className = `rcq-badge ${d.calorieQuality || 'MODERATE'}`;
+  }
+  setEl('rcq-reason', d.qualityReason || '');
+  setEl('rcq-good-num', `${Math.round(good)} kcal`);
+  setEl('rcq-neutral-num', `${Math.round(neutral)} kcal`);
+  setEl('rcq-bad-num', `${Math.round(bad)} kcal`);
+
+  setTimeout(() => {
+    setStyle('rcq-good-bar', 'width', `${goodPct}%`);
+    setStyle('rcq-neutral-bar', 'width', `${neutralPct}%`);
+    setStyle('rcq-bad-bar', 'width', `${badPct}%`);
+  }, 100);
 }
 
 async function addToLog() {
@@ -343,6 +444,9 @@ async function addToLog() {
     await api('POST', '/food/log', {
       foodName: currentFood.foodName,
       quantityGrams: Number(currentFood.quantityGrams) || 100,
+      quantityDisplay: currentFood.quantityDisplay || '',
+      quantityUnit: currentFood.quantityUnit || 'grams',
+      quantityAmount: currentFood.quantityAmount || currentFood.quantityGrams,
       mealType,
       logDate: today,
       calories: Number(currentFood.calories) || 0,
@@ -350,6 +454,10 @@ async function addToLog() {
       carbsGrams: Number(currentFood.carbsGrams) || 0,
       fatGrams: Number(currentFood.fatGrams) || 0,
       fiberGrams: Number(currentFood.fiberGrams) || 0,
+      goodCalories: Number(currentFood.goodCalories) || 0,
+      badCalories: Number(currentFood.badCalories) || 0,
+      neutralCalories: Number(currentFood.neutralCalories) || 0,
+      calorieQuality: currentFood.calorieQuality || 'MODERATE',
       aiAnalysis: currentFood.aiAnalysis || ''
     });
     showToast(`✓ ${currentFood.foodName} added to ${mealType.toLowerCase()}!`);
@@ -357,10 +465,18 @@ async function addToLog() {
     document.getElementById('food-search-result').classList.add('hidden');
     document.getElementById('food-name-input').value = '';
     document.getElementById('food-qty-input').value = '100';
+    document.getElementById('food-name-count').value = '';
     loadFoodPage();
   } catch (e) {
     showToast('Failed to add: ' + e.message, 'error');
   } finally { setLoading(btn, false); }
+}
+
+async function loadFoodPage() {
+  try {
+    dailySummary = await api('GET', '/food/daily');
+    renderMealsList('food-log-list', dailySummary.meals || []);
+  } catch (e) { console.error(e); }
 }
 
 async function deleteLog(logId) {
@@ -370,6 +486,149 @@ async function deleteLog(logId) {
     loadFoodPage();
     if (document.getElementById('page-dashboard').classList.contains('active')) loadDashboard();
   } catch (e) { showToast('Delete failed: ' + e.message, 'error'); }
+}
+
+// ════════════════════════════════
+// WORKOUT PLAN (NEW)
+// ════════════════════════════════
+async function loadWorkoutPlan() {
+  // Use cached if available
+  if (workoutPlan) { renderWorkoutPlan(workoutPlan); return; }
+  await fetchWorkoutPlan();
+}
+
+async function regenerateWorkoutPlan() {
+  workoutPlan = null;
+  await fetchWorkoutPlan();
+}
+
+async function fetchWorkoutPlan() {
+  const loadEl = document.getElementById('workout-loading');
+  const wrapEl = document.getElementById('workout-plan-wrap');
+  const regenBtn = document.getElementById('regen-btn-text');
+  const regenLoader = document.getElementById('regen-loader');
+
+  loadEl.classList.remove('hidden');
+  wrapEl.classList.add('hidden');
+  if (regenBtn) regenBtn.style.opacity = '0.4';
+  if (regenLoader) regenLoader.classList.remove('hidden');
+
+  try {
+    workoutPlan = await api('GET', '/food/workout-plan');
+    renderWorkoutPlan(workoutPlan);
+  } catch (e) {
+    showToast('Could not load workout plan: ' + e.message, 'error');
+  } finally {
+    loadEl.classList.add('hidden');
+    if (regenBtn) regenBtn.style.opacity = '1';
+    if (regenLoader) regenLoader.classList.add('hidden');
+  }
+}
+
+function renderWorkoutPlan(plan) {
+  if (!plan) return;
+  const wrapEl = document.getElementById('workout-plan-wrap');
+  wrapEl.classList.remove('hidden');
+
+  // Overview
+  setEl('woc-title', plan.planTitle || 'Your Weekly Plan');
+  setEl('woc-desc', plan.planDescription || '');
+  setEl('woc-note', plan.weeklyNote || '');
+
+  // Update subtitle with gender/goal
+  const genderEmoji = (plan.gender || '').toLowerCase() === 'female' ? '👩' : '👨';
+  const sub = document.getElementById('workout-subtitle');
+  if (sub) sub.textContent = `${genderEmoji} ${formatGoal(plan.goal)} · ${formatActivity(plan.activityLevel)}`;
+
+  // Stats
+  const statsEl = document.getElementById('woc-stats');
+  if (statsEl && plan.days) {
+    const trainingDays = plan.days.filter(d => d.type === 'TRAINING').length;
+    const totalMins = plan.days.reduce((a,d) => a + (d.estimatedMinutes || 0), 0);
+    const totalCals = plan.days.reduce((a,d) => a + (d.estimatedCaloriesBurn || 0), 0);
+    statsEl.innerHTML = `
+      <div class="woc-stat">
+        <div class="woc-stat-val" style="color:var(--accent)">${trainingDays}</div>
+        <div class="woc-stat-lbl">Training Days</div>
+      </div>
+      <div class="woc-stat">
+        <div class="woc-stat-val" style="color:var(--accent2)">${totalMins} min</div>
+        <div class="woc-stat-lbl">Total Weekly</div>
+      </div>
+      <div class="woc-stat">
+        <div class="woc-stat-val" style="color:var(--fat)">~${totalCals} kcal</div>
+        <div class="woc-stat-lbl">Weekly Burn</div>
+      </div>
+    `;
+  }
+
+  // Day cards
+  const grid = document.getElementById('workout-days-grid');
+  if (grid && plan.days) {
+    grid.innerHTML = plan.days.map(day => renderDayCard(day)).join('');
+  }
+
+  // Tips
+  if (plan.generalTips && plan.generalTips.length > 0) {
+    const tipsCard = document.getElementById('workout-tips-card');
+    const tipsList = document.getElementById('tips-list');
+    if (tipsCard) tipsCard.style.display = 'block';
+    if (tipsList) {
+      tipsList.innerHTML = plan.generalTips.map(tip => `<li>${tip}</li>`).join('');
+    }
+  }
+}
+
+function renderDayCard(day) {
+  const isRest = day.type === 'REST';
+  const typeClass = day.type || 'TRAINING';
+  const intensityClass = day.intensity || 'Medium';
+
+  const exercisesHtml = isRest
+    ? `<div class="wdc-rest-day">
+        <div class="rest-icon">😴</div>
+        <div class="rest-text">Complete rest day — let your muscles recover!</div>
+      </div>`
+    : (day.exercises || []).map((ex, i) => `
+        <div class="wdc-exercise">
+          <div class="wdc-ex-num">${i + 1}</div>
+          <div class="wdc-ex-info">
+            <div class="wdc-ex-name">${ex.name}</div>
+            <div class="wdc-ex-detail">
+              <span>🔄 ${ex.sets}</span>
+              <span>⚡ ${ex.reps}</span>
+              <span>⏱ ${ex.rest}</span>
+            </div>
+          </div>
+          <span class="wdc-muscle">${ex.muscleGroup || ''}</span>
+        </div>
+      `).join('');
+
+  const metaHtml = !isRest ? `
+    <div class="wdc-meta">
+      <span>⏱ ${day.estimatedMinutes || 0} min</span>
+      <span>🔥 ~${day.estimatedCaloriesBurn || 0} kcal</span>
+    </div>` : '';
+
+  const notesHtml = day.notes ? `<div class="wdc-notes">💬 ${day.notes}</div>` : '';
+
+  return `
+    <div class="workout-day-card">
+      <div class="wdc-header">
+        <div>
+          <div class="wdc-day">${day.day}</div>
+          <div class="wdc-focus">${day.focus}</div>
+        </div>
+        <div class="wdc-badges">
+          <span class="wdc-type-badge ${typeClass}">${typeClass.replace('_', ' ')}</span>
+          <span class="wdc-intensity ${intensityClass}">${intensityClass}</span>
+        </div>
+      </div>
+      ${metaHtml}
+      <div class="wdc-exercises">${exercisesHtml}</div>
+      ${notesHtml}
+    </div>
+  `;
 }
 
 // ════════════════════════════════
@@ -386,7 +645,6 @@ function renderWeekly(days) {
   if (!days || days.length === 0) return;
   const today = new Date().toISOString().split('T')[0];
 
-  // Summary stats
   const activeDays = days.filter(d => d.consumedCalories > 0);
   const avgCal = activeDays.length ? Math.round(activeDays.reduce((a,d) => a + d.consumedCalories, 0) / activeDays.length) : 0;
   const avgPro = activeDays.length ? Math.round(activeDays.reduce((a,d) => a + (d.consumedProtein||0), 0) / activeDays.length) : 0;
@@ -397,7 +655,6 @@ function renderWeekly(days) {
   setEl('ws-days-logged', `${activeDays.length}/7`);
   setEl('ws-goal-hit', `${Math.round((goalHit/7)*100)}%`);
 
-  // Canvas chart
   const canvas = document.getElementById('weekly-chart');
   if (canvas) {
     const parent = canvas.parentElement;
@@ -416,7 +673,6 @@ function renderWeekly(days) {
       const y = H - calH - 30;
       const isToday = d.date === today;
 
-      // Bar gradient
       const grad = ctx.createLinearGradient(0, y, 0, H - 30);
       if (isToday) {
         grad.addColorStop(0, '#b9ff4b'); grad.addColorStop(1, 'rgba(185,255,75,0.3)');
@@ -435,7 +691,6 @@ function renderWeekly(days) {
         ctx.closePath(); ctx.fill();
       }
 
-      // Label
       ctx.fillStyle = isToday ? '#b9ff4b' : '#555d6b';
       ctx.font = `${isToday ? '600' : '400'} 11px Cabinet Grotesk, DM Sans, sans-serif`;
       ctx.textAlign = 'center';
@@ -450,23 +705,26 @@ function renderWeekly(days) {
     });
   }
 
-  // Day cards
   const list = document.getElementById('weekly-list');
   const sorted = [...days].reverse();
   list.innerHTML = sorted.map(d => {
     const isToday = d.date === today;
     const pct = Math.min(d.calorieProgress || 0, 100);
     const dayLabel = new Date(d.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+    const badPct = d.badCaloriePercent || 0;
+    const badColor = badPct > 40 ? 'var(--danger)' : badPct > 20 ? 'var(--fat)' : 'var(--success)';
     return `
       <div class="weekly-day-card ${isToday ? 'today' : ''}">
         <div class="weekly-day-label">${isToday ? '⚡ Today' : dayLabel}</div>
         <div class="weekly-day-bar-wrap"><div class="weekly-day-bar" style="width:${pct}%"></div></div>
-        <div class="weekly-day-cal">${Math.round(d.consumedCalories || 0)} / ${Math.round(d.targetCalories || 0)} kcal</div>
+        <div style="text-align:right">
+          <div class="weekly-day-cal">${Math.round(d.consumedCalories || 0)} / ${Math.round(d.targetCalories || 0)} kcal</div>
+          ${d.consumedCalories > 0 ? `<div style="font-size:0.66rem;color:${badColor}">⚠️ bad: ${Math.round(d.badCalories||0)} kcal</div>` : ''}
+        </div>
       </div>
     `;
   }).join('');
 
-  // Animate bars after paint
   setTimeout(() => {
     document.querySelectorAll('.weekly-day-bar').forEach((bar, i) => {
       bar.style.transition = `width 0.8s cubic-bezier(0.4,0,0.2,1) ${i * 0.06}s`;
@@ -492,6 +750,7 @@ function populateProfilePage() {
   setEl('pt-fat', `${Math.round(userData.dailyFatTarget || 0)}g`);
 
   setEl('ps-name', userData.name || '—');
+  setEl('ps-gender', userData.gender === 'MALE' ? '👨 Male' : '👩 Female');
   setEl('ps-weight', `${userData.weightKg || '—'} kg`);
   setEl('ps-height', `${userData.heightCm || '—'} cm`);
   setEl('ps-goal', formatGoal(userData.goal));
@@ -513,7 +772,7 @@ function bmiCategoryStr(bmi) {
 }
 
 function formatGoal(g) {
-  return { WEIGHT_LOSS:'Weight Loss', MUSCLE_GAIN:'Muscle Gain', MAINTAIN:'Maintain', RECOMPOSITION:'Recomposition' }[g] || g || '—';
+  return { WEIGHT_LOSS:'🔥 Weight Loss', MUSCLE_GAIN:'💪 Muscle Gain', MAINTAIN:'⚖️ Maintain', RECOMPOSITION:'🔄 Recomp' }[g] || g || '—';
 }
 
 function formatActivity(l) {
@@ -522,7 +781,10 @@ function formatActivity(l) {
 
 function updateSidebarUser() {
   const el = document.getElementById('sidebar-user-badge');
-  if (el && userData) el.innerHTML = `<strong>${userData.name || 'User'}</strong><br>${formatGoal(userData.goal)}`;
+  if (el && userData) {
+    const genderIcon = userData.gender === 'FEMALE' ? '👩' : '👨';
+    el.innerHTML = `<strong>${genderIcon} ${userData.name || 'User'}</strong><br>${formatGoal(userData.goal)}`;
+  }
 }
 
 async function updateGoal() {
@@ -539,7 +801,8 @@ async function updateGoal() {
     msgEl.classList.remove('hidden');
     populateProfilePage();
     updateSidebarUser();
-    showToast('Goals updated!');
+    showToast('Goals updated! Workout plan will regenerate.');
+    workoutPlan = null; // Force regenerate workout plan
     setTimeout(() => msgEl.classList.add('hidden'), 3000);
   } catch (e) {
     showToast('Update failed: ' + e.message, 'error');
@@ -568,15 +831,4 @@ function showToast(msg, type = 'success') {
   t.classList.remove('hidden');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.add('hidden'), 3500);
-}
-
-// Polyfill roundRect
-if (!CanvasRenderingContext2D.prototype.roundRect) {
-  CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r) {
-    if (w < 2*r) r = w/2; if (h < 2*r) r = h/2;
-    this.beginPath(); this.moveTo(x+r,y);
-    this.arcTo(x+w,y,x+w,y+h,r); this.arcTo(x+w,y+h,x,y+h,r);
-    this.arcTo(x,y+h,x,y,r); this.arcTo(x,y,x+r,y,r);
-    this.closePath(); return this;
-  };
 }

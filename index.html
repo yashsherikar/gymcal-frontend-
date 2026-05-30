@@ -10,12 +10,9 @@
 </head>
 <body>
 
-<!-- Animated Background Canvas -->
 <canvas id="bg-canvas"></canvas>
 
-<!-- ════════════════════════════════
-     AUTH SCREEN
-════════════════════════════════ -->
+<!-- ═══════════════════ AUTH ═══════════════════ -->
 <div id="auth-screen" class="screen active">
   <div class="auth-particles">
     <div class="auth-grid"></div>
@@ -91,18 +88,18 @@
         <div class="form-group">
           <label>Gender</label>
           <select id="reg-gender">
-            <option value="MALE">Male</option>
-            <option value="FEMALE">Female</option>
+            <option value="MALE">Male 👨</option>
+            <option value="FEMALE">Female 👩</option>
           </select>
         </div>
         <div class="form-group">
           <label>Activity Level</label>
           <select id="reg-activity">
-            <option value="SEDENTARY">Sedentary</option>
-            <option value="LIGHT">Light Activity</option>
-            <option value="MODERATE">Moderate</option>
-            <option value="ACTIVE">Active</option>
-            <option value="VERY_ACTIVE">Very Active</option>
+            <option value="SEDENTARY">Sedentary (desk job)</option>
+            <option value="LIGHT">Light (1-3x/week)</option>
+            <option value="MODERATE">Moderate (3-5x/week)</option>
+            <option value="ACTIVE">Active (6x/week)</option>
+            <option value="VERY_ACTIVE">Very Active (athlete)</option>
           </select>
         </div>
       </div>
@@ -133,9 +130,7 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════
-     MAIN APP
-════════════════════════════════ -->
+<!-- ═══════════════════ MAIN APP ═══════════════════ -->
 <div id="app-screen" class="screen hidden">
 
   <!-- Sidebar -->
@@ -150,6 +145,9 @@
       </a>
       <a class="nav-link" onclick="showPage('food')" data-page="food">
         <span class="nav-icon">🍎</span><span>Food Log</span>
+      </a>
+      <a class="nav-link" onclick="showPage('workout')" data-page="workout">
+        <span class="nav-icon">🏋️</span><span>Workout Plan</span>
       </a>
       <a class="nav-link" onclick="showPage('weekly')" data-page="weekly">
         <span class="nav-icon">📈</span><span>Weekly</span>
@@ -173,6 +171,7 @@
   <div class="mobile-nav hidden" id="mobile-nav">
     <a onclick="showPage('dashboard');closeMobileMenu()" data-page="dashboard">📊 Dashboard</a>
     <a onclick="showPage('food');closeMobileMenu()" data-page="food">🍎 Food Log</a>
+    <a onclick="showPage('workout');closeMobileMenu()" data-page="workout">🏋️ Workout Plan</a>
     <a onclick="showPage('weekly');closeMobileMenu()" data-page="weekly">📈 Weekly</a>
     <a onclick="showPage('profile');closeMobileMenu()" data-page="profile">👤 Profile</a>
     <a onclick="handleLogout()">🚪 Sign Out</a>
@@ -180,7 +179,7 @@
 
   <main class="main-content">
 
-    <!-- ── DASHBOARD ── -->
+    <!-- ══ DASHBOARD ══ -->
     <div id="page-dashboard" class="page active">
       <div class="page-header">
         <div>
@@ -234,13 +233,42 @@
         </div>
       </div>
 
+      <!-- NEW: Good vs Bad Calories Dashboard Card -->
+      <div class="calorie-quality-card" id="dash-quality-card">
+        <div class="cq-title">Today's Calorie Quality</div>
+        <div class="cq-bars">
+          <div class="cq-bar-row">
+            <span class="cq-label good">✅ Good</span>
+            <div class="cq-bar-track">
+              <div class="cq-bar-fill good-fill" id="dash-good-bar" style="width:0%"></div>
+            </div>
+            <span class="cq-value" id="dash-good-cal">0 kcal</span>
+          </div>
+          <div class="cq-bar-row">
+            <span class="cq-label neutral">⚡ Neutral</span>
+            <div class="cq-bar-track">
+              <div class="cq-bar-fill neutral-fill" id="dash-neutral-bar" style="width:0%"></div>
+            </div>
+            <span class="cq-value" id="dash-neutral-cal">0 kcal</span>
+          </div>
+          <div class="cq-bar-row">
+            <span class="cq-label bad">⚠️ Bad</span>
+            <div class="cq-bar-track">
+              <div class="cq-bar-fill bad-fill" id="dash-bad-bar" style="width:0%"></div>
+            </div>
+            <span class="cq-value" id="dash-bad-cal">0 kcal</span>
+          </div>
+        </div>
+        <div class="cq-summary" id="dash-cq-summary">Log food to see calorie quality breakdown</div>
+      </div>
+
       <div class="section-title">Today's Meals</div>
       <div id="today-meals-list" class="meals-list">
         <div class="empty-state">No food logged yet. <a onclick="showPage('food')">Add your first meal →</a></div>
       </div>
     </div>
 
-    <!-- ── FOOD LOG ── -->
+    <!-- ══ FOOD LOG ══ -->
     <div id="page-food" class="page hidden">
       <div class="page-header">
         <div>
@@ -250,17 +278,53 @@
       </div>
 
       <div class="food-search-card">
-        <div class="search-title">🔍 AI Food Search</div>
-        <div class="search-row">
+        <div class="search-title">🤖 AI Food Analyzer</div>
+
+        <!-- NEW: Dual input mode toggle -->
+        <div class="qty-mode-tabs">
+          <button class="qty-tab active" id="tab-grams" onclick="switchQtyMode('grams')">By Grams/Weight</button>
+          <button class="qty-tab" id="tab-count" onclick="switchQtyMode('count')">By Quantity (pieces, cups...)</button>
+        </div>
+
+        <!-- Mode A: grams -->
+        <div id="qty-mode-grams" class="search-row">
           <div class="form-group flex1">
             <label>Food Name</label>
             <input type="text" id="food-name-input" placeholder="e.g. chicken breast, dal chawal, banana..." />
           </div>
           <div class="form-group w120">
-            <label>Quantity (g)</label>
-            <input type="number" id="food-qty-input" placeholder="100" value="100" />
+            <label>Weight (g)</label>
+            <input type="number" id="food-qty-input" placeholder="100" value="100" min="1" />
           </div>
           <button class="btn-search" onclick="searchFood()">Analyze</button>
+        </div>
+
+        <!-- Mode B: natural quantity -->
+        <div id="qty-mode-count" class="search-row hidden">
+          <div class="form-group flex1">
+            <label>Food Name</label>
+            <input type="text" id="food-name-count" placeholder="e.g. roti, dal, boiled egg, apple..." />
+          </div>
+          <div class="form-group w100">
+            <label>Amount</label>
+            <input type="number" id="food-amount-count" placeholder="2" value="1" min="0.1" step="0.5" />
+          </div>
+          <div class="form-group w130">
+            <label>Unit</label>
+            <select id="food-unit-count">
+              <option value="pieces">pieces / nos</option>
+              <option value="cups">cups</option>
+              <option value="bowls">bowls</option>
+              <option value="plates">plates</option>
+              <option value="tablespoons">tablespoons</option>
+              <option value="teaspoons">teaspoons</option>
+              <option value="slices">slices</option>
+              <option value="medium">medium sized</option>
+              <option value="large">large sized</option>
+              <option value="small">small sized</option>
+            </select>
+          </div>
+          <button class="btn-search" onclick="searchFoodCount()">Analyze</button>
         </div>
 
         <div id="food-search-loading" class="search-loading hidden">
@@ -280,6 +344,32 @@
             <div class="result-macro-item fat"><span id="res-fat">0g</span><small>fat</small></div>
             <div class="result-macro-item fib"><span id="res-fib">0g</span><small>fiber</small></div>
           </div>
+
+          <!-- NEW: Good vs Bad calories in result -->
+          <div class="result-calquality" id="result-calquality">
+            <div class="rcq-header">
+              <span class="rcq-badge" id="rcq-badge">GOOD</span>
+              <span class="rcq-reason" id="rcq-reason"></span>
+            </div>
+            <div class="rcq-bars">
+              <div class="rcq-bar-item">
+                <span class="rcq-lbl good">✅ Good</span>
+                <div class="rcq-track"><div class="rcq-fill good-fill" id="rcq-good-bar"></div></div>
+                <span class="rcq-num" id="rcq-good-num">0</span>
+              </div>
+              <div class="rcq-bar-item">
+                <span class="rcq-lbl neutral">⚡ Neutral</span>
+                <div class="rcq-track"><div class="rcq-fill neutral-fill" id="rcq-neutral-bar"></div></div>
+                <span class="rcq-num" id="rcq-neutral-num">0</span>
+              </div>
+              <div class="rcq-bar-item">
+                <span class="rcq-lbl bad">⚠️ Bad</span>
+                <div class="rcq-track"><div class="rcq-fill bad-fill" id="rcq-bad-bar"></div></div>
+                <span class="rcq-num" id="rcq-bad-num">0</span>
+              </div>
+            </div>
+          </div>
+
           <div class="result-ai" id="result-ai"></div>
           <div class="add-to-log-row">
             <select id="meal-type-select">
@@ -303,7 +393,45 @@
       </div>
     </div>
 
-    <!-- ── WEEKLY ── -->
+    <!-- ══ WORKOUT PLAN ══ (NEW) -->
+    <div id="page-workout" class="page hidden">
+      <div class="page-header">
+        <div>
+          <h2>Weekly Workout Plan</h2>
+          <p class="page-sub" id="workout-subtitle">AI-generated plan based on your goal & profile</p>
+        </div>
+        <button class="btn-add-food" onclick="regenerateWorkoutPlan()">
+          <span id="regen-btn-text">🔄 Regenerate</span>
+          <span class="btn-loader hidden" id="regen-loader">⟳</span>
+        </button>
+      </div>
+
+      <div id="workout-loading" class="search-loading hidden" style="padding:3rem">
+        <div class="loader-dots"><span></span><span></span><span></span></div>
+        <p>AI is crafting your personalized workout plan…</p>
+      </div>
+
+      <!-- Plan overview -->
+      <div id="workout-plan-wrap" class="hidden">
+        <div class="workout-overview-card" id="workout-overview-card">
+          <div class="woc-title" id="woc-title">Your Weekly Plan</div>
+          <div class="woc-desc" id="woc-desc"></div>
+          <div class="woc-stats" id="woc-stats"></div>
+        </div>
+
+        <!-- Day cards -->
+        <div class="workout-days-grid" id="workout-days-grid"></div>
+
+        <!-- Tips -->
+        <div class="workout-tips-card" id="workout-tips-card" style="display:none">
+          <div class="section-title">💡 General Tips</div>
+          <ul class="tips-list" id="tips-list"></ul>
+          <div class="woc-note" id="woc-note"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ WEEKLY ══ -->
     <div id="page-weekly" class="page hidden">
       <div class="page-header">
         <h2>Weekly Overview</h2>
@@ -326,7 +454,7 @@
       <div id="weekly-list" class="weekly-list"></div>
     </div>
 
-    <!-- ── PROFILE ── -->
+    <!-- ══ PROFILE ══ -->
     <div id="page-profile" class="page hidden">
       <div class="page-header">
         <h2>Profile & Goals</h2>
@@ -368,6 +496,7 @@
           <div class="profile-card-title">Your Stats</div>
           <div class="targets-list">
             <div class="target-item"><span>Name</span><strong id="ps-name">—</strong></div>
+            <div class="target-item"><span>Gender</span><strong id="ps-gender">—</strong></div>
             <div class="target-item"><span>Weight</span><strong id="ps-weight">—</strong></div>
             <div class="target-item"><span>Height</span><strong id="ps-height">—</strong></div>
             <div class="target-item"><span>Goal</span><strong id="ps-goal">—</strong></div>
