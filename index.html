@@ -3,158 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GymCal — AI Nutrition Tracker</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <title>GymCal — AI Fitness & Nutrition</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
 <canvas id="bg-canvas"></canvas>
 
-<!-- ═══════════════════ AUTH ═══════════════════ -->
+<!-- AUTH SCREEN -->
 <div id="auth-screen" class="screen active">
   <div class="auth-particles">
     <div class="auth-grid"></div>
-    <div class="auth-orb orb1"></div>
-    <div class="auth-orb orb2"></div>
-    <div class="auth-orb orb3"></div>
+    <div class="auth-orb orb1"></div><div class="auth-orb orb2"></div><div class="auth-orb orb3"></div>
   </div>
-
   <div class="auth-container">
     <div class="brand">
       <div class="brand-icon-wrap">⚡</div>
       <h1 class="brand-name">GymCal</h1>
-      <p class="brand-tagline">AI-Powered Nutrition Intelligence</p>
+      <p class="brand-tagline">AI-Powered Fitness & Nutrition Intelligence</p>
     </div>
 
-    <!-- Login -->
+    <!-- LOGIN -->
     <div id="login-form" class="auth-card">
       <h2>Welcome Back</h2>
-      <p class="auth-sub">Track your macros, crush your goals</p>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="login-email" placeholder="you@example.com" />
-      </div>
-      <div class="form-group" style="margin-top:0.8rem">
-        <label>Password</label>
-        <input type="password" id="login-password" placeholder="••••••••" />
-      </div>
+      <p class="auth-sub">Track macros, crush goals</p>
+      <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="you@example.com"/></div>
+      <div class="form-group" style="margin-top:.8rem"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"/></div>
       <div id="login-error" class="form-error hidden"></div>
-      <button class="btn-primary" onclick="handleLogin()">
-        <span class="btn-text">Sign In →</span>
-        <span class="btn-loader hidden">⟳</span>
-      </button>
+      <button class="btn-primary" onclick="handleLogin()"><span class="btn-text">Sign In →</span><span class="btn-loader hidden">⟳</span></button>
       <p class="auth-switch">No account? <a onclick="toggleAuth('register')">Create one →</a></p>
     </div>
 
-    <!-- Register -->
+    <!-- REGISTER -->
     <div id="register-form" class="auth-card hidden">
       <h2>Create Account</h2>
       <p class="auth-sub">Set up your AI fitness profile</p>
-
-      <div class="form-row" style="margin-bottom:0.8rem">
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" id="reg-name" placeholder="Rahul Sharma" />
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="reg-email" placeholder="you@example.com" />
-        </div>
+      <div class="form-row">
+        <div class="form-group"><label>Full Name</label><input type="text" id="reg-name" placeholder="Rahul Sharma"/></div>
+        <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com"/></div>
       </div>
-      <div class="form-group" style="margin-bottom:0.8rem">
-        <label>Password</label>
-        <input type="password" id="reg-password" placeholder="min. 6 characters" />
-      </div>
-
+      <div class="form-group" style="margin:.8rem 0"><label>Password</label><input type="password" id="reg-password" placeholder="min. 6 chars"/></div>
       <div class="section-label">Body Metrics</div>
-      <div class="form-row three" style="margin-bottom:0.8rem">
-        <div class="form-group">
-          <label>Weight (kg)</label>
-          <input type="number" id="reg-weight" placeholder="70" />
-        </div>
-        <div class="form-group">
-          <label>Height (cm)</label>
-          <input type="number" id="reg-height" placeholder="175" />
-        </div>
-        <div class="form-group">
-          <label>Age</label>
-          <input type="number" id="reg-age" placeholder="25" />
-        </div>
+      <div class="form-row three">
+        <div class="form-group"><label>Weight (kg)</label><input type="number" id="reg-weight" placeholder="70"/></div>
+        <div class="form-group"><label>Height (cm)</label><input type="number" id="reg-height" placeholder="175"/></div>
+        <div class="form-group"><label>Age</label><input type="number" id="reg-age" placeholder="25"/></div>
       </div>
-
-      <div class="form-row" style="margin-bottom:0.8rem">
-        <div class="form-group">
-          <label>Gender</label>
-          <select id="reg-gender">
-            <option value="MALE">Male 👨</option>
-            <option value="FEMALE">Female 👩</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Activity Level</label>
-          <select id="reg-activity">
-            <option value="SEDENTARY">Sedentary (desk job)</option>
-            <option value="LIGHT">Light (1-3x/week)</option>
-            <option value="MODERATE">Moderate (3-5x/week)</option>
-            <option value="ACTIVE">Active (6x/week)</option>
-            <option value="VERY_ACTIVE">Very Active (athlete)</option>
-          </select>
-        </div>
+      <div class="form-row" style="margin-top:.8rem">
+        <div class="form-group"><label>Gender</label><select id="reg-gender"><option value="MALE">Male</option><option value="FEMALE">Female</option></select></div>
+        <div class="form-group"><label>Activity Level</label><select id="reg-activity"><option value="SEDENTARY">Sedentary</option><option value="LIGHT">Light</option><option value="MODERATE">Moderate</option><option value="ACTIVE">Active</option><option value="VERY_ACTIVE">Very Active</option></select></div>
       </div>
-
       <div class="section-label">Your Goal</div>
       <div class="goal-grid">
-        <div class="goal-card active" data-goal="WEIGHT_LOSS" onclick="selectGoal(this)">
-          <span class="goal-emoji">🔥</span><span class="goal-label">Weight Loss</span>
-        </div>
-        <div class="goal-card" data-goal="MUSCLE_GAIN" onclick="selectGoal(this)">
-          <span class="goal-emoji">💪</span><span class="goal-label">Muscle Gain</span>
-        </div>
-        <div class="goal-card" data-goal="MAINTAIN" onclick="selectGoal(this)">
-          <span class="goal-emoji">⚖️</span><span class="goal-label">Maintain</span>
-        </div>
-        <div class="goal-card" data-goal="RECOMPOSITION" onclick="selectGoal(this)">
-          <span class="goal-emoji">🔄</span><span class="goal-label">Recomp</span>
-        </div>
+        <div class="goal-card active" data-goal="WEIGHT_LOSS" onclick="selectGoal(this)"><span class="goal-emoji">🔥</span><span class="goal-label">Weight Loss</span></div>
+        <div class="goal-card" data-goal="MUSCLE_GAIN" onclick="selectGoal(this)"><span class="goal-emoji">💪</span><span class="goal-label">Muscle Gain</span></div>
+        <div class="goal-card" data-goal="MAINTAIN" onclick="selectGoal(this)"><span class="goal-emoji">⚖️</span><span class="goal-label">Maintain</span></div>
+        <div class="goal-card" data-goal="RECOMPOSITION" onclick="selectGoal(this)"><span class="goal-emoji">🔄</span><span class="goal-label">Recomp</span></div>
       </div>
-
       <div id="reg-error" class="form-error hidden"></div>
-      <button class="btn-primary" onclick="handleRegister()">
-        <span class="btn-text">Create Account →</span>
-        <span class="btn-loader hidden">⟳</span>
-      </button>
-      <p class="auth-switch">Have an account? <a onclick="toggleAuth('login')">Sign in →</a></p>
+      <button class="btn-primary" onclick="handleRegister()"><span class="btn-text">Create Account →</span><span class="btn-loader hidden">⟳</span></button>
+      <p class="auth-switch">Have account? <a onclick="toggleAuth('login')">Sign in →</a></p>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════ MAIN APP ═══════════════════ -->
+<!-- APP SCREEN -->
 <div id="app-screen" class="screen hidden">
-
-  <!-- Sidebar -->
   <nav class="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-icon-sm">⚡</div>
-      <span>GymCal</span>
-    </div>
+    <div class="sidebar-brand"><div class="brand-icon-sm">⚡</div><span>GymCal</span></div>
     <div class="nav-links">
-      <a class="nav-link active" onclick="showPage('dashboard')" data-page="dashboard">
-        <span class="nav-icon">📊</span><span>Dashboard</span>
-      </a>
-      <a class="nav-link" onclick="showPage('food')" data-page="food">
-        <span class="nav-icon">🍎</span><span>Food Log</span>
-      </a>
-      <a class="nav-link" onclick="showPage('workout')" data-page="workout">
-        <span class="nav-icon">🏋️</span><span>Workout Plan</span>
-      </a>
-      <a class="nav-link" onclick="showPage('weekly')" data-page="weekly">
-        <span class="nav-icon">📈</span><span>Weekly</span>
-      </a>
-      <a class="nav-link" onclick="showPage('profile')" data-page="profile">
-        <span class="nav-icon">👤</span><span>Profile</span>
-      </a>
+      <a class="nav-link active" onclick="showPage('dashboard')" data-page="dashboard"><span class="nav-icon">📊</span><span>Dashboard</span></a>
+      <a class="nav-link" onclick="showPage('food')" data-page="food"><span class="nav-icon">🍎</span><span>Food Log</span></a>
+      <a class="nav-link" onclick="showPage('workout')" data-page="workout"><span class="nav-icon">🏋️</span><span>Workout</span></a>
+      <a class="nav-link" onclick="showPage('weekly')" data-page="weekly"><span class="nav-icon">📈</span><span>Weekly</span></a>
+      <a class="nav-link" onclick="showPage('profile')" data-page="profile"><span class="nav-icon">👤</span><span>Profile</span></a>
     </div>
     <div class="sidebar-footer">
       <div class="user-badge" id="sidebar-user-badge"></div>
@@ -162,38 +84,33 @@
     </div>
   </nav>
 
-  <!-- Mobile Header -->
   <header class="mobile-header">
     <div class="brand-icon-sm">⚡</div>
     <span class="mobile-brand">GymCal</span>
     <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
   </header>
   <div class="mobile-nav hidden" id="mobile-nav">
-    <a onclick="showPage('dashboard');closeMobileMenu()" data-page="dashboard">📊 Dashboard</a>
-    <a onclick="showPage('food');closeMobileMenu()" data-page="food">🍎 Food Log</a>
-    <a onclick="showPage('workout');closeMobileMenu()" data-page="workout">🏋️ Workout Plan</a>
-    <a onclick="showPage('weekly');closeMobileMenu()" data-page="weekly">📈 Weekly</a>
-    <a onclick="showPage('profile');closeMobileMenu()" data-page="profile">👤 Profile</a>
+    <a onclick="showPage('dashboard');closeMobileMenu()">📊 Dashboard</a>
+    <a onclick="showPage('food');closeMobileMenu()">🍎 Food Log</a>
+    <a onclick="showPage('workout');closeMobileMenu()">🏋️ Workout</a>
+    <a onclick="showPage('weekly');closeMobileMenu()">📈 Weekly</a>
+    <a onclick="showPage('profile');closeMobileMenu()">👤 Profile</a>
     <a onclick="handleLogout()">🚪 Sign Out</a>
   </div>
 
   <main class="main-content">
 
-    <!-- ══ DASHBOARD ══ -->
+    <!-- DASHBOARD -->
     <div id="page-dashboard" class="page active">
       <div class="page-header">
-        <div>
-          <h2 id="greeting-text">Good Morning 👋</h2>
-          <p class="page-sub" id="greeting-date">Today's nutrition overview</p>
-        </div>
+        <div><h2 id="greeting-text">Good Morning 👋</h2><p class="page-sub" id="greeting-date"></p></div>
         <button class="btn-add-food" onclick="showPage('food')">+ Add Food</button>
       </div>
-
       <div class="dashboard-hero">
         <div class="calorie-ring-wrap">
           <svg class="calorie-ring" viewBox="0 0 200 200">
-            <circle cx="100" cy="100" r="80" class="ring-track" />
-            <circle cx="100" cy="100" r="80" class="ring-fill" id="calorie-ring-fill" />
+            <circle cx="100" cy="100" r="80" class="ring-track"/>
+            <circle cx="100" cy="100" r="80" class="ring-fill" id="calorie-ring-fill"/>
           </svg>
           <div class="ring-center">
             <div class="ring-consumed" id="ring-consumed">0</div>
@@ -203,286 +120,155 @@
           <div class="ring-target-label" id="ring-target-label">of — kcal target</div>
         </div>
         <div class="macro-cards">
-          <div class="macro-card protein">
-            <div class="macro-emoji">🥩</div>
-            <div class="macro-info">
-              <div class="macro-val" id="dash-protein">0g</div>
-              <div class="macro-name">Protein</div>
-              <div class="macro-bar-wrap"><div class="macro-bar" id="dash-protein-bar" style="width:0%"></div></div>
-              <div class="macro-target" id="dash-protein-target">of — g</div>
-            </div>
-          </div>
-          <div class="macro-card carbs">
-            <div class="macro-emoji">🌾</div>
-            <div class="macro-info">
-              <div class="macro-val" id="dash-carbs">0g</div>
-              <div class="macro-name">Carbs</div>
-              <div class="macro-bar-wrap"><div class="macro-bar" id="dash-carbs-bar" style="width:0%"></div></div>
-              <div class="macro-target" id="dash-carbs-target">of — g</div>
-            </div>
-          </div>
-          <div class="macro-card fat">
-            <div class="macro-emoji">🥑</div>
-            <div class="macro-info">
-              <div class="macro-val" id="dash-fat">0g</div>
-              <div class="macro-name">Fat</div>
-              <div class="macro-bar-wrap"><div class="macro-bar" id="dash-fat-bar" style="width:0%"></div></div>
-              <div class="macro-target" id="dash-fat-target">of — g</div>
-            </div>
-          </div>
+          <div class="macro-card protein"><div class="macro-emoji">🥩</div><div class="macro-info"><div class="macro-val" id="dash-protein">0g</div><div class="macro-name">Protein</div><div class="macro-bar-wrap"><div class="macro-bar" id="dash-protein-bar" style="width:0%"></div></div><div class="macro-target" id="dash-protein-target">of —g</div></div></div>
+          <div class="macro-card carbs"><div class="macro-emoji">🌾</div><div class="macro-info"><div class="macro-val" id="dash-carbs">0g</div><div class="macro-name">Carbs</div><div class="macro-bar-wrap"><div class="macro-bar" id="dash-carbs-bar" style="width:0%"></div></div><div class="macro-target" id="dash-carbs-target">of —g</div></div></div>
+          <div class="macro-card fat"><div class="macro-emoji">🥑</div><div class="macro-info"><div class="macro-val" id="dash-fat">0g</div><div class="macro-name">Fat</div><div class="macro-bar-wrap"><div class="macro-bar" id="dash-fat-bar" style="width:0%"></div></div><div class="macro-target" id="dash-fat-target">of —g</div></div></div>
         </div>
       </div>
-
-      <!-- NEW: Good vs Bad Calories Dashboard Card -->
-      <div class="calorie-quality-card" id="dash-quality-card">
-        <div class="cq-title">Today's Calorie Quality</div>
-        <div class="cq-bars">
-          <div class="cq-bar-row">
-            <span class="cq-label good">✅ Good</span>
-            <div class="cq-bar-track">
-              <div class="cq-bar-fill good-fill" id="dash-good-bar" style="width:0%"></div>
-            </div>
-            <span class="cq-value" id="dash-good-cal">0 kcal</span>
-          </div>
-          <div class="cq-bar-row">
-            <span class="cq-label neutral">⚡ Neutral</span>
-            <div class="cq-bar-track">
-              <div class="cq-bar-fill neutral-fill" id="dash-neutral-bar" style="width:0%"></div>
-            </div>
-            <span class="cq-value" id="dash-neutral-cal">0 kcal</span>
-          </div>
-          <div class="cq-bar-row">
-            <span class="cq-label bad">⚠️ Bad</span>
-            <div class="cq-bar-track">
-              <div class="cq-bar-fill bad-fill" id="dash-bad-bar" style="width:0%"></div>
-            </div>
-            <span class="cq-value" id="dash-bad-cal">0 kcal</span>
-          </div>
-        </div>
-        <div class="cq-summary" id="dash-cq-summary">Log food to see calorie quality breakdown</div>
+      <!-- Good/Bad Calories Dashboard Card -->
+      <div class="calqual-row" id="calqual-row" style="display:none">
+        <div class="calqual-card good"><div class="calqual-icon">🟢</div><div class="calqual-info"><div class="calqual-val" id="dash-good-cal">0</div><div class="calqual-lbl">Good Calories<small>Protein + Fiber</small></div></div></div>
+        <div class="calqual-card neutral"><div class="calqual-icon">🟡</div><div class="calqual-info"><div class="calqual-val" id="dash-carb-cal">0</div><div class="calqual-lbl">Energy Calories<small>Carbohydrates</small></div></div></div>
+        <div class="calqual-card bad"><div class="calqual-icon">🔴</div><div class="calqual-info"><div class="calqual-val" id="dash-bad-cal">0</div><div class="calqual-lbl">Dense Calories<small>Fats</small></div></div></div>
+        <div class="calqual-card score"><div class="calqual-icon" id="dash-qual-emoji">⭐</div><div class="calqual-info"><div class="calqual-val" id="dash-qual-text">—</div><div class="calqual-lbl">Diet Quality<small>Today's score</small></div></div></div>
       </div>
-
       <div class="section-title">Today's Meals</div>
-      <div id="today-meals-list" class="meals-list">
-        <div class="empty-state">No food logged yet. <a onclick="showPage('food')">Add your first meal →</a></div>
-      </div>
+      <div id="today-meals-list" class="meals-list"><div class="empty-state">No food logged yet. <a onclick="showPage('food')">Add your first meal →</a></div></div>
     </div>
 
-    <!-- ══ FOOD LOG ══ -->
+    <!-- FOOD LOG -->
     <div id="page-food" class="page hidden">
-      <div class="page-header">
-        <div>
-          <h2>Food Log</h2>
-          <p class="page-sub">AI-powered nutrition analysis</p>
-        </div>
-      </div>
-
+      <div class="page-header"><div><h2>Food Log</h2><p class="page-sub">AI nutrition analysis</p></div></div>
       <div class="food-search-card">
-        <div class="search-title">🤖 AI Food Analyzer</div>
-
-        <!-- NEW: Dual input mode toggle -->
-        <div class="qty-mode-tabs">
-          <button class="qty-tab active" id="tab-grams" onclick="switchQtyMode('grams')">By Grams/Weight</button>
-          <button class="qty-tab" id="tab-count" onclick="switchQtyMode('count')">By Quantity (pieces, cups...)</button>
-        </div>
-
-        <!-- Mode A: grams -->
-        <div id="qty-mode-grams" class="search-row">
-          <div class="form-group flex1">
-            <label>Food Name</label>
-            <input type="text" id="food-name-input" placeholder="e.g. chicken breast, dal chawal, banana..." />
-          </div>
-          <div class="form-group w120">
-            <label>Weight (g)</label>
-            <input type="number" id="food-qty-input" placeholder="100" value="100" min="1" />
-          </div>
-          <button class="btn-search" onclick="searchFood()">Analyze</button>
-        </div>
-
-        <!-- Mode B: natural quantity -->
-        <div id="qty-mode-count" class="search-row hidden">
-          <div class="form-group flex1">
-            <label>Food Name</label>
-            <input type="text" id="food-name-count" placeholder="e.g. roti, dal, boiled egg, apple..." />
-          </div>
-          <div class="form-group w100">
-            <label>Amount</label>
-            <input type="number" id="food-amount-count" placeholder="2" value="1" min="0.1" step="0.5" />
-          </div>
-          <div class="form-group w130">
-            <label>Unit</label>
-            <select id="food-unit-count">
-              <option value="pieces">pieces / nos</option>
-              <option value="cups">cups</option>
-              <option value="bowls">bowls</option>
-              <option value="plates">plates</option>
-              <option value="tablespoons">tablespoons</option>
-              <option value="teaspoons">teaspoons</option>
-              <option value="slices">slices</option>
-              <option value="medium">medium sized</option>
-              <option value="large">large sized</option>
-              <option value="small">small sized</option>
+        <div class="search-title">🔍 AI Food Search</div>
+        <div class="search-row">
+          <div class="form-group flex1"><label>Food Name</label><input type="text" id="food-name-input" placeholder="chicken breast, dal chawal, 1 cup rice..."/></div>
+          <div class="form-group w100"><label>Quantity</label><input type="number" id="food-qty-input" placeholder="100" value="100"/></div>
+          <div class="form-group w120"><label>Unit</label>
+            <select id="food-unit-select">
+              <option value="grams">grams (g)</option>
+              <option value="pieces">pieces</option>
+              <option value="cup">cup</option>
+              <option value="bowl">bowl</option>
+              <option value="tbsp">tbsp</option>
+              <option value="tsp">tsp</option>
+              <option value="ml">ml</option>
+              <option value="serving">serving</option>
             </select>
           </div>
-          <button class="btn-search" onclick="searchFoodCount()">Analyze</button>
+          <button class="btn-search" onclick="searchFood()">Analyze ✨</button>
         </div>
-
-        <div id="food-search-loading" class="search-loading hidden">
-          <div class="loader-dots"><span></span><span></span><span></span></div>
-          <p>AI is analyzing nutrition…</p>
-        </div>
-
+        <div id="food-search-loading" class="search-loading hidden"><div class="loader-dots"><span></span><span></span><span></span></div><p>AI is analyzing nutrition…</p></div>
         <div id="food-search-result" class="food-result hidden">
-          <div class="result-header">
-            <div class="result-name" id="result-name"></div>
-            <div class="result-qty" id="result-qty"></div>
-          </div>
+          <div class="result-header"><div class="result-name" id="result-name"></div><div class="result-badges"><span class="result-qty" id="result-qty"></span><span class="result-quality" id="result-quality"></span></div></div>
           <div class="result-macros">
-            <div class="result-macro-item cal"><span id="res-cal">0</span><small>kcal</small></div>
+            <div class="result-macro-item cal"><span id="res-cal">0</span><small>kcal total</small></div>
             <div class="result-macro-item pro"><span id="res-pro">0g</span><small>protein</small></div>
             <div class="result-macro-item car"><span id="res-car">0g</span><small>carbs</small></div>
             <div class="result-macro-item fat"><span id="res-fat">0g</span><small>fat</small></div>
             <div class="result-macro-item fib"><span id="res-fib">0g</span><small>fiber</small></div>
           </div>
-
-          <!-- NEW: Good vs Bad calories in result -->
-          <div class="result-calquality" id="result-calquality">
-            <div class="rcq-header">
-              <span class="rcq-badge" id="rcq-badge">GOOD</span>
-              <span class="rcq-reason" id="rcq-reason"></span>
-            </div>
-            <div class="rcq-bars">
-              <div class="rcq-bar-item">
-                <span class="rcq-lbl good">✅ Good</span>
-                <div class="rcq-track"><div class="rcq-fill good-fill" id="rcq-good-bar"></div></div>
-                <span class="rcq-num" id="rcq-good-num">0</span>
-              </div>
-              <div class="rcq-bar-item">
-                <span class="rcq-lbl neutral">⚡ Neutral</span>
-                <div class="rcq-track"><div class="rcq-fill neutral-fill" id="rcq-neutral-bar"></div></div>
-                <span class="rcq-num" id="rcq-neutral-num">0</span>
-              </div>
-              <div class="rcq-bar-item">
-                <span class="rcq-lbl bad">⚠️ Bad</span>
-                <div class="rcq-track"><div class="rcq-fill bad-fill" id="rcq-bad-bar"></div></div>
-                <span class="rcq-num" id="rcq-bad-num">0</span>
-              </div>
-            </div>
+          <!-- Good/Bad breakdown -->
+          <div class="calqual-mini">
+            <div class="calqual-mini-item good"><span id="res-good-cal">0</span> kcal <small>🟢 Good</small></div>
+            <div class="calqual-mini-item neutral"><span id="res-carb-cal">0</span> kcal <small>🟡 Energy</small></div>
+            <div class="calqual-mini-item bad"><span id="res-bad-cal">0</span> kcal <small>🔴 Dense</small></div>
           </div>
-
           <div class="result-ai" id="result-ai"></div>
           <div class="add-to-log-row">
-            <select id="meal-type-select">
-              <option value="BREAKFAST">🌅 Breakfast</option>
-              <option value="LUNCH">☀️ Lunch</option>
-              <option value="DINNER">🌙 Dinner</option>
-              <option value="SNACK">🍿 Snack</option>
-            </select>
-            <button class="btn-primary" onclick="addToLog()">
-              <span class="btn-text">+ Add to Log</span>
-              <span class="btn-loader hidden">⟳</span>
-            </button>
+            <select id="meal-type-select"><option value="BREAKFAST">🌅 Breakfast</option><option value="LUNCH">☀️ Lunch</option><option value="DINNER">🌙 Dinner</option><option value="SNACK">🍿 Snack</option></select>
+            <button class="btn-primary" onclick="addToLog()"><span class="btn-text">+ Add to Log</span><span class="btn-loader hidden">⟳</span></button>
           </div>
         </div>
         <div id="food-search-error" class="form-error hidden"></div>
       </div>
-
       <div class="section-title" style="margin-top:2rem">Today's Log</div>
-      <div id="food-log-list" class="meals-list">
-        <div class="empty-state">No food logged today.</div>
-      </div>
+      <div id="food-log-list" class="meals-list"><div class="empty-state">No food logged today.</div></div>
     </div>
 
-    <!-- ══ WORKOUT PLAN ══ (NEW) -->
+    <!-- WORKOUT -->
     <div id="page-workout" class="page hidden">
-      <div class="page-header">
-        <div>
-          <h2>Weekly Workout Plan</h2>
-          <p class="page-sub" id="workout-subtitle">AI-generated plan based on your goal & profile</p>
+      <div class="page-header"><div><h2>AI Workout Plan</h2><p class="page-sub">Personalized for your health & goals</p></div></div>
+
+      <div id="workout-form-section">
+        <div class="workout-setup-card">
+          <div class="setup-title">🏋️ Generate Your Plan</div>
+          <div class="section-label">Health Conditions <span style="color:var(--text3);text-transform:none;font-size:0.75rem">(select all that apply)</span></div>
+          <div class="health-conditions-grid">
+            <div class="condition-chip" data-val="none" onclick="toggleCondition(this)"><span>✅ None</span></div>
+            <div class="condition-chip" data-val="heart_disease" onclick="toggleCondition(this)"><span>❤️ Heart Disease</span></div>
+            <div class="condition-chip" data-val="hypertension" onclick="toggleCondition(this)"><span>🩺 Hypertension</span></div>
+            <div class="condition-chip" data-val="asthma" onclick="toggleCondition(this)"><span>💨 Asthma</span></div>
+            <div class="condition-chip" data-val="diabetes" onclick="toggleCondition(this)"><span>🩸 Diabetes</span></div>
+            <div class="condition-chip" data-val="knee_pain" onclick="toggleCondition(this)"><span>🦵 Knee Pain</span></div>
+            <div class="condition-chip" data-val="back_pain" onclick="toggleCondition(this)"><span>🫀 Back Pain</span></div>
+            <div class="condition-chip" data-val="obesity" onclick="toggleCondition(this)"><span>⚖️ Obesity</span></div>
+          </div>
+          <div class="form-row three" style="margin-top:1.2rem">
+            <div class="form-group"><label>Fitness Level</label>
+              <select id="fitness-level-sel"><option value="BEGINNER">Beginner</option><option value="INTERMEDIATE" selected>Intermediate</option><option value="ADVANCED">Advanced</option></select>
+            </div>
+            <div class="form-group"><label>Days / Week</label>
+              <select id="workout-days-sel"><option value="3">3 days</option><option value="4" selected>4 days</option><option value="5">5 days</option><option value="6">6 days</option></select>
+            </div>
+            <div class="form-group"><label>Equipment</label>
+              <select id="equipment-sel"><option value="NONE">Bodyweight Only</option><option value="DUMBBELLS">Dumbbells</option><option value="GYM">Full Gym</option><option value="RESISTANCE_BANDS">Bands</option></select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:.8rem"><label>Additional Notes (optional)</label><input type="text" id="workout-notes" placeholder="e.g. I prefer morning workouts, no pool access..."/></div>
+          <div id="workout-gen-error" class="form-error hidden"></div>
+          <button class="btn-primary" id="generate-plan-btn" onclick="generateWorkoutPlan()" style="max-width:280px;margin-top:1rem">
+            <span class="btn-text">⚡ Generate AI Plan</span><span class="btn-loader hidden">⟳</span>
+          </button>
         </div>
-        <button class="btn-add-food" onclick="regenerateWorkoutPlan()">
-          <span id="regen-btn-text">🔄 Regenerate</span>
-          <span class="btn-loader hidden" id="regen-loader">⟳</span>
-        </button>
       </div>
 
-      <div id="workout-loading" class="search-loading hidden" style="padding:3rem">
-        <div class="loader-dots"><span></span><span></span><span></span></div>
-        <p>AI is crafting your personalized workout plan…</p>
-      </div>
-
-      <!-- Plan overview -->
-      <div id="workout-plan-wrap" class="hidden">
-        <div class="workout-overview-card" id="workout-overview-card">
-          <div class="woc-title" id="woc-title">Your Weekly Plan</div>
-          <div class="woc-desc" id="woc-desc"></div>
-          <div class="woc-stats" id="woc-stats"></div>
+      <div id="workout-plan-section" class="hidden">
+        <div class="plan-header-card">
+          <div class="plan-header-left">
+            <div class="plan-name" id="plan-name"></div>
+            <div class="plan-meta">
+              <span class="plan-badge" id="plan-difficulty"></span>
+              <span class="plan-badge accent" id="plan-goal"></span>
+              <span class="plan-badge" id="plan-cals-burned"></span>
+            </div>
+          </div>
+          <button class="btn-regenerate" onclick="showWorkoutForm()">↺ Regenerate</button>
         </div>
-
-        <!-- Day cards -->
-        <div class="workout-days-grid" id="workout-days-grid"></div>
-
-        <!-- Tips -->
-        <div class="workout-tips-card" id="workout-tips-card" style="display:none">
-          <div class="section-title">💡 General Tips</div>
-          <ul class="tips-list" id="tips-list"></ul>
-          <div class="woc-note" id="woc-note"></div>
-        </div>
+        <div class="plan-advice-card" id="plan-advice"></div>
+        <div class="plan-safety-card hidden" id="plan-safety"></div>
+        <div class="weekly-workout-grid" id="weekly-workout-grid"></div>
       </div>
     </div>
 
-    <!-- ══ WEEKLY ══ -->
+    <!-- WEEKLY -->
     <div id="page-weekly" class="page hidden">
-      <div class="page-header">
-        <h2>Weekly Overview</h2>
-        <p class="page-sub">Last 7 days nutrition summary</p>
-      </div>
-
+      <div class="page-header"><h2>Weekly Overview</h2><p class="page-sub">Last 7 days summary</p></div>
       <div class="weekly-stats-row" id="weekly-stats-row">
         <div class="weekly-stat-card"><div class="weekly-stat-val" id="ws-avg-cal">—</div><div class="weekly-stat-lbl">Avg Calories</div></div>
         <div class="weekly-stat-card"><div class="weekly-stat-val" id="ws-avg-pro">—</div><div class="weekly-stat-lbl">Avg Protein</div></div>
         <div class="weekly-stat-card"><div class="weekly-stat-val" id="ws-days-logged">—</div><div class="weekly-stat-lbl">Days Logged</div></div>
         <div class="weekly-stat-card"><div class="weekly-stat-val" id="ws-goal-hit">—</div><div class="weekly-stat-lbl">Goal Hit %</div></div>
       </div>
-
-      <div class="weekly-wrap">
-        <div class="weekly-chart-title">Calories — Last 7 Days</div>
-        <canvas id="weekly-chart"></canvas>
-      </div>
-
+      <div class="weekly-wrap"><div class="weekly-chart-title">Calories — Last 7 Days</div><canvas id="weekly-chart"></canvas></div>
       <div class="section-title">Daily Breakdown</div>
       <div id="weekly-list" class="weekly-list"></div>
     </div>
 
-    <!-- ══ PROFILE ══ -->
+    <!-- PROFILE -->
     <div id="page-profile" class="page hidden">
-      <div class="page-header">
-        <h2>Profile & Goals</h2>
-        <p class="page-sub">Body metrics and nutrition targets</p>
-      </div>
-
+      <div class="page-header"><h2>Profile & Goals</h2><p class="page-sub">Body metrics and nutrition targets</p></div>
       <div class="profile-grid">
         <div class="profile-card bmi-card">
           <div class="profile-card-title">BMI Status</div>
-          <div class="bmi-display">
-            <div class="bmi-number" id="profile-bmi">—</div>
-            <div class="bmi-category" id="profile-bmi-cat">—</div>
-          </div>
+          <div class="bmi-display"><div class="bmi-number" id="profile-bmi">—</div><div class="bmi-category" id="profile-bmi-cat">—</div></div>
           <div class="bmi-bar-wrap">
-            <div class="bmi-scale">
-              <div class="bmi-seg underweight"></div>
-              <div class="bmi-seg normal"></div>
-              <div class="bmi-seg overweight"></div>
-              <div class="bmi-seg obese"></div>
-            </div>
-            <div class="bmi-labels">
-              <span>Under</span><span>Normal</span><span>Over</span><span>Obese</span>
-            </div>
+            <div class="bmi-scale"><div class="bmi-seg underweight"></div><div class="bmi-seg normal"></div><div class="bmi-seg overweight"></div><div class="bmi-seg obese"></div></div>
+            <div class="bmi-labels"><span>Under</span><span>Normal</span><span>Over</span><span>Obese</span></div>
             <div class="bmi-indicator" id="bmi-indicator"></div>
           </div>
         </div>
-
-        <div class="profile-card targets-card">
+        <div class="profile-card">
           <div class="profile-card-title">Daily Targets</div>
           <div class="targets-list">
             <div class="target-item"><span>🔥 Calories</span><strong id="pt-cal">—</strong></div>
@@ -491,12 +277,10 @@
             <div class="target-item"><span>🥑 Fat</span><strong id="pt-fat">—</strong></div>
           </div>
         </div>
-
-        <div class="profile-card stats-card">
+        <div class="profile-card">
           <div class="profile-card-title">Your Stats</div>
           <div class="targets-list">
             <div class="target-item"><span>Name</span><strong id="ps-name">—</strong></div>
-            <div class="target-item"><span>Gender</span><strong id="ps-gender">—</strong></div>
             <div class="target-item"><span>Weight</span><strong id="ps-weight">—</strong></div>
             <div class="target-item"><span>Height</span><strong id="ps-height">—</strong></div>
             <div class="target-item"><span>Goal</span><strong id="ps-goal">—</strong></div>
@@ -504,39 +288,15 @@
           </div>
         </div>
       </div>
-
       <div class="update-goal-card">
         <div class="profile-card-title">Update Goal & Stats</div>
         <div class="form-row three">
-          <div class="form-group">
-            <label>Goal</label>
-            <select id="update-goal-sel">
-              <option value="WEIGHT_LOSS">🔥 Weight Loss</option>
-              <option value="MUSCLE_GAIN">💪 Muscle Gain</option>
-              <option value="MAINTAIN">⚖️ Maintain</option>
-              <option value="RECOMPOSITION">🔄 Recomposition</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Activity Level</label>
-            <select id="update-activity-sel">
-              <option value="SEDENTARY">Sedentary</option>
-              <option value="LIGHT">Light</option>
-              <option value="MODERATE">Moderate</option>
-              <option value="ACTIVE">Active</option>
-              <option value="VERY_ACTIVE">Very Active</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>New Weight (kg)</label>
-            <input type="number" id="update-weight-inp" placeholder="70" />
-          </div>
+          <div class="form-group"><label>Goal</label><select id="update-goal-sel"><option value="WEIGHT_LOSS">🔥 Weight Loss</option><option value="MUSCLE_GAIN">💪 Muscle Gain</option><option value="MAINTAIN">⚖️ Maintain</option><option value="RECOMPOSITION">🔄 Recomp</option></select></div>
+          <div class="form-group"><label>Activity Level</label><select id="update-activity-sel"><option value="SEDENTARY">Sedentary</option><option value="LIGHT">Light</option><option value="MODERATE">Moderate</option><option value="ACTIVE">Active</option><option value="VERY_ACTIVE">Very Active</option></select></div>
+          <div class="form-group"><label>New Weight (kg)</label><input type="number" id="update-weight-inp" placeholder="70"/></div>
         </div>
         <div id="update-goal-msg" class="form-success hidden"></div>
-        <button class="btn-primary" onclick="updateGoal()" style="max-width:240px">
-          <span class="btn-text">Update Targets</span>
-          <span class="btn-loader hidden">⟳</span>
-        </button>
+        <button class="btn-primary" onclick="updateGoal()" style="max-width:240px"><span class="btn-text">Update Targets</span><span class="btn-loader hidden">⟳</span></button>
       </div>
     </div>
 
@@ -544,7 +304,6 @@
 </div>
 
 <div id="toast" class="toast hidden"></div>
-
 <script src="app.js"></script>
 </body>
 </html>
